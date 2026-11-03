@@ -1,0 +1,435 @@
+@font-face {
+  font-family: "Myriad Pro";
+  src: url("/fonts/MyriadPro-Regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Myriad Pro";
+  src: url("/fonts/MyriadPro-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
+.thaco-display-root {
+  --head-color: #4472c4;
+  --row-color-1: #cfd5ea;
+  --row-color-2: #e9ebf5;
+  --text-color: #00529c;
+  --title-color: #ff0000;
+  --row-height: 70px;
+  --data-font-size: 24px;
+  --title-font-size: 48px;
+  --date-font-size: 31px;
+  --heading-font-size: 20px;
+
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #ffffff;
+  font-family: "Myriad Pro", "Segoe UI", Arial, sans-serif;
+  user-select: none;
+  z-index: 99999;
+}
+
+.thaco-display-app {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.thaco-display-head {
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+  height: 13vh;
+  min-height: 70px;
+  padding-right: 2vw;
+  background: linear-gradient(90deg, #fff 0, #fff6c9 12%, #fffbe0 100%);
+  flex: none;
+}
+
+.thaco-display-logo {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2.2vw;
+  background: #00529c;
+  color: #fff;
+  font-weight: 800;
+  font-size: 3.2vh;
+  letter-spacing: 0.05em;
+  clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
+  min-width: 19vw;
+}
+
+.thaco-display-logo img {
+  display: block;
+  width: 88%;
+  max-height: 72%;
+  object-fit: contain;
+}
+
+.thaco-responsive-logo {
+  display: none;
+}
+
+.thaco-display-titles {
+  flex: 1;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.thaco-display-title {
+  font-weight: 800;
+  font-size: var(--title-font-size);
+  color: var(--title-color);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.thaco-display-date {
+  font-weight: 800;
+  font-size: var(--date-font-size);
+  color: var(--text-color);
+  margin-top: 2px;
+}
+
+/* Grid & Table */
+.thaco-display-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.thaco-display-row {
+  display: grid;
+  /* Tối ưu tỉ lệ 7 cột: tăng cột Nội Dung lên 27fr và Tư Vấn lên 24fr để chứa trọn vẹn văn bản */
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 15fr) minmax(0, 11fr) minmax(0, 11fr) minmax(0, 8.5fr) minmax(0, 27fr) minmax(0, 24fr);
+  border-bottom: 1px solid #fff;
+  overflow: hidden;
+  /* Bắt buộc để không bao giờ tràn đè lên dòng khác */
+}
+
+.thaco-display-row>div {
+  display: flex;
+  align-items: center;
+  padding: 0 0.8vw;
+  border-right: 1px solid #fff;
+  color: var(--text-color);
+  overflow: hidden;
+  line-height: 1.2;
+  min-width: 0;
+  /* Tránh tràn layout trong CSS Grid */
+  min-height: 0;
+  max-height: 100%;
+  word-break: break-word;
+}
+
+/* Cột 7: Tư vấn dịch vụ - hỗ trợ tên dài rớt dòng chữ trọn vẹn, không cắt chữ */
+.thaco-display-row>div:nth-child(7) {
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.1;
+}
+
+/* Biển số và giờ hẹn không bị gãy dòng */
+.thaco-display-row>div:nth-child(3),
+.thaco-display-row>div:nth-child(5) {
+  white-space: nowrap;
+}
+
+.thaco-display-heading {
+  background: var(--head-color);
+  flex: none;
+  height: 7vh;
+  min-height: 44px;
+}
+
+.thaco-display-heading>div {
+  color: #fff;
+  font-weight: 800;
+  justify-content: center;
+  text-align: center;
+  font-size: var(--heading-font-size);
+  white-space: normal;
+  /* Cho phép rớt dòng thông minh nếu màn hình hẹp */
+  line-height: 1.15;
+  padding: 0 4px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.thaco-display-body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.thaco-display-page {
+  position: absolute;
+  inset: 0;
+  font-size: var(--data-font-size);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.thaco-display-page.slide-out {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+.thaco-display-page.slide-in {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.thaco-display-page .thaco-display-row {
+  height: var(--row-height);
+  overflow: hidden;
+}
+
+.thaco-display-page .thaco-display-row:nth-child(odd) {
+  background: var(--row-color-1);
+}
+
+.thaco-display-page .thaco-display-row:nth-child(even) {
+  background: var(--row-color-2);
+}
+
+.thaco-display-page .thaco-display-row>div:nth-child(1),
+.thaco-display-page .thaco-display-row>div:nth-child(3),
+.thaco-display-page .thaco-display-row>div:nth-child(4),
+.thaco-display-page .thaco-display-row>div:nth-child(5) {
+  justify-content: center;
+  text-align: center;
+}
+
+.thaco-display-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3vh;
+  color: var(--text-color);
+  text-align: center;
+  padding: 2vw;
+  font-weight: 600;
+}
+
+.thaco-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(0, 82, 156, 0.15);
+  border-top-color: var(--text-color, #00529c);
+  border-radius: 50%;
+  animation: thacoSpin 0.8s linear infinite;
+}
+
+@keyframes thacoSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.thaco-display-status-dot {
+  position: fixed;
+  left: 6px;
+  bottom: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.65;
+  transition: background 0.3s ease;
+  z-index: 100000;
+}
+
+.thaco-display-page-number {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #00529c;
+  opacity: 0.6;
+  z-index: 100000;
+}
+
+.thaco-mobile-scroll-hint {
+  display: none;
+}
+
+/* ========================================================= */
+/* RESPONSIVE STYLES CHO CÁC MÀN HÌNH NHỎ HƠN (Laptops, Tablets, Mobile) */
+/* ========================================================= */
+
+/* 1. Màn hình Laptop, Tablet xoay ngang (Từ 1200px trở xuống) */
+@media (max-width: 1200px) {
+
+  /* Header chuyển thành dạng cột gọn gàng, cân đối */
+  .thaco-display-head {
+    height: auto;
+    min-height: unset;
+    padding: 0.65rem 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.25rem;
+  }
+
+  /* Ẩn hoàn toàn container .thaco-display-logo khi responsive theo yêu cầu */
+  .thaco-display-logo {
+    display: none !important;
+  }
+
+  /* Hiển thị trực tiếp ảnh LOGO-THACO-AUTO.png to rõ ràng trên nền header */
+  .thaco-responsive-logo {
+    display: block;
+    height: auto;
+    max-height: 56px;
+    width: auto;
+    max-width: min(280px, 85vw);
+    object-fit: contain;
+    margin: 2px auto 4px auto;
+  }
+
+  .thaco-display-title {
+    font-size: clamp(20px, 3.2vw, 32px) !important;
+    line-height: 1.2;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  .thaco-display-date {
+    font-size: clamp(13px, 1.8vw, 17px) !important;
+    margin-top: 2px;
+  }
+
+  /* Bảng vừa vặn 100% chiều rộng, không tràn ngang và không đè chữ */
+  .thaco-display-row {
+    grid-template-columns: minmax(36px, 4fr) minmax(95px, 15fr) minmax(80px, 11fr) minmax(80px, 11fr) minmax(58px, 8.5fr) minmax(130px, 28fr) minmax(120px, 24fr);
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .thaco-display-row>div {
+    padding: 0 5px;
+    line-height: 1.2;
+    overflow: hidden;
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .thaco-display-heading>div {
+    font-size: clamp(11px, 1.5vw, 14px) !important;
+    padding: 0 3px;
+  }
+}
+
+/* 2. Tablet dọc & Màn hình vừa (581px - 768px) */
+@media (max-width: 768px) {
+  .thaco-display-title {
+    font-size: clamp(18px, 4.2vw, 24px) !important;
+  }
+
+  .thaco-display-date {
+    font-size: clamp(12px, 3vw, 15px) !important;
+  }
+
+  .thaco-display-row {
+    grid-template-columns: minmax(30px, 3.5fr) minmax(85px, 15fr) minmax(70px, 11fr) minmax(70px, 11fr) minmax(52px, 8fr) minmax(110px, 24fr) minmax(105px, 27.5fr);
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .thaco-display-row>div {
+    padding: 0 4px;
+    font-size: clamp(11px, 2vw, 13px) !important;
+  }
+
+  .thaco-display-heading>div {
+    font-size: clamp(10px, 1.8vw, 12px) !important;
+    padding: 0 2px;
+  }
+}
+
+/* 3. Màn hình điện thoại di động nhỏ (Dưới 580px) */
+@media (max-width: 580px) {
+  .thaco-display-root {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .thaco-display-app {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .thaco-display-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    flex: none;
+  }
+
+  .thaco-display-row {
+    min-width: 660px;
+    /* Đảm bảo cuộn ngang mượt mà với đầy đủ không gian cho 7 cột */
+    grid-template-columns: 36px 120px 90px 90px 65px 145px 144px;
+    overflow: hidden;
+  }
+
+  .thaco-display-heading {
+    height: 44px;
+  }
+
+  .thaco-display-body {
+    position: relative;
+    overflow: visible;
+    min-height: 350px;
+  }
+
+  .thaco-display-page {
+    position: relative;
+  }
+
+  .thaco-display-page .thaco-display-row {
+    height: auto !important;
+    min-height: 52px;
+    padding: 6px 0;
+    overflow: hidden;
+  }
+
+  .thaco-display-row>div {
+    padding: 0 6px;
+    font-size: 13px !important;
+  }
+
+  .thaco-display-heading>div {
+    font-size: 12px !important;
+  }
+
+  .thaco-mobile-scroll-hint {
+    display: block;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 0.775rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #bae6fd;
+  }
+}

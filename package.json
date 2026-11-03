@@ -1,20 +1,23 @@
 {
-  "name": "thaco-auto-backend",
+  "name": "thaco-auto-frontend",
+  "private": true,
   "version": "1.0.0",
   "type": "module",
-  "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "migrate": "node src/db/migrate.js",
-    "seed": "node src/db/seed.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.1"
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.1"
   }
 }
