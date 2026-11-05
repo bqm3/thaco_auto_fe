@@ -198,6 +198,7 @@ export default function DisplayScreen() {
     function recalc() {
       if (!bodyRef.current || !config || !rootRef.current) return;
       const width = window.innerWidth;
+      const viewportHeight = window.innerHeight;
       const bodyHeight = bodyRef.current.clientHeight || 500;
 
       // Scale factor for smaller screens
@@ -218,6 +219,17 @@ export default function DisplayScreen() {
       const baseDate = Number(config.date_font_size || config.dateFontSize) || 31;
       const baseData = Number(config.data_font_size || config.dataFontSize) || 24;
 
+      // Browser zoom reduces the CSS viewport height. On short viewports (for
+      // example old Opera at 150%), fit both title lines inside the 13vh header
+      // instead of letting the centered text extend above the visible page.
+      const requestedTitle = Math.max(18, Math.round(baseTitle * scale));
+      const requestedDate = Math.max(13, Math.round(baseDate * scale));
+      const headerHeight = Math.max(70, viewportHeight * 0.13);
+      const headerTextHeight = requestedTitle * 1.05 + requestedDate * 1.1 + 2;
+      const headerHeightScale = width > 1200
+        ? Math.min(1, Math.max(0.65, (headerHeight - 8) / headerTextHeight))
+        : 1;
+
       // Font chữ nội dung được giới hạn tự động theo chiều cao của hàng để không bao giờ bị đè chữ
       const maxDataFont = Math.max(12, Math.floor(rowHeight * 0.28));
       const scaledData = Math.round(baseData * scale);
@@ -231,8 +243,8 @@ export default function DisplayScreen() {
       style.setProperty('--row-color-2', config.color2 || '#e9ebf5');
       style.setProperty('--text-color', config.color_text || config.colorText || '#00529c');
       style.setProperty('--title-color', config.color_title || config.colorTitle || '#ff0000');
-      style.setProperty('--title-font-size', `${Math.max(18, Math.round(baseTitle * scale))}px`);
-      style.setProperty('--date-font-size', `${Math.max(13, Math.round(baseDate * scale))}px`);
+      style.setProperty('--title-font-size', `${Math.max(18, Math.floor(requestedTitle * headerHeightScale))}px`);
+      style.setProperty('--date-font-size', `${Math.max(13, Math.floor(requestedDate * headerHeightScale))}px`);
       style.setProperty('--data-font-size', `${finalDataFont}px`);
 
       setPageSize(calculatedSize);

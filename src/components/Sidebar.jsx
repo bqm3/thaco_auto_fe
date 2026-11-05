@@ -96,7 +96,7 @@ export default function Sidebar({ isOpen, onClose }) {
             <span>Màn hình Dịch vụ</span>
           </NavLink>
 
-          <div style={{ fontSize: '0.725rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', padding: '1rem 0.5rem 0.25rem' }}>
+          {/* <div style={{ fontSize: '0.725rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', padding: '1rem 0.5rem 0.25rem' }}>
             Màn hình Trực tiếp
           </div>
 
@@ -120,7 +120,7 @@ export default function Sidebar({ isOpen, onClose }) {
           >
             <ExternalLink size={17} />
             <span>Màn hình HP 02 ↗</span>
-          </a>
+          </a> */}
         </nav>
 
         <div className="sidebar-footer">
