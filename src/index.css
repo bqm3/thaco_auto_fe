@@ -439,6 +439,8 @@ a:hover {
   justify-content: center;
   z-index: 50;
   padding: 1.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   animation: fadeIn 0.2s ease;
 }
 
@@ -447,12 +449,24 @@ a:hover {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 680px;
-  max-height: 90vh;
+  max-height: calc(100vh - 2.5rem);
+  max-height: calc(100dvh - 2.5rem);
   display: flex;
   flex-direction: column;
+  min-height: 0;
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   animation: slideUp 0.2s ease;
+}
+
+/* Form modals wrap the scrollable body and footer in a form. The form must
+   also be a bounded flex container, otherwise its body grows and gets clipped. */
+.modal-content > form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .modal-header {
@@ -461,12 +475,16 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .modal-body {
   padding: 1.5rem 1.75rem;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-footer {
@@ -477,6 +495,28 @@ a:hover {
   justify-content: flex-end;
   gap: 0.75rem;
   background: #f8fafc;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .modal-content {
+    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .modal-header,
+  .modal-body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1rem;
+  }
 }
 
 @keyframes fadeIn {

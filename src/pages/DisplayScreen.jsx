@@ -25,6 +25,8 @@ function normalizeTime(value) {
   return match ? `${pad(+match[1])}:${match[2]}` : text;
 }
 
+const isSameData = (first, second) => JSON.stringify(first) === JSON.stringify(second);
+
 function parseCsv(text) {
   const output = [];
   let row = [], field = '', quoted = false;
@@ -75,7 +77,9 @@ export default function DisplayScreen() {
     async function loadConfig() {
       try {
         const data = await api.get(`/screens/${slug}`);
-        setConfig(data);
+        // Keep the same object reference when the server data has not changed.
+        // Otherwise every config poll restarts the sheet and paging timers.
+        setConfig(previous => isSameData(previous, data) ? previous : data);
         document.title = `${data.name} | THACO AUTO`;
       } catch (err) {
         setLoadError('Không tìm thấy cấu hình màn hình: ' + err.message);
@@ -94,11 +98,12 @@ export default function DisplayScreen() {
     if (!config) return;
 
     let isMounted = true;
+    let refreshTimer;
     async function fetchSheet() {
       const sheetUrl = config.sheet_url || config.sheetUrl || '';
       if (!sheetUrl.trim()) {
         if (isMounted) {
-          setAllRows(DEFAULT_ROWS);
+          setAllRows(previous => isSameData(previous, DEFAULT_ROWS) ? previous : DEFAULT_ROWS);
           setStatusDotColor('#2e7d32');
           setStatusDotTitle('Hiển thị dữ liệu tiếp nhận dịch vụ');
           setIsDataLoading(false);
@@ -151,7 +156,9 @@ export default function DisplayScreen() {
         }).filter(r => r.kh || r.bs);
 
         if (isMounted) {
-          setAllRows(parsed);
+          // Only update state when the sheet content actually changed so the
+          // independent paging cycle can continue uninterrupted.
+          setAllRows(previous => isSameData(previous, parsed) ? previous : parsed);
           setLoadError('');
           setStatusDotColor('#2e7d32');
           setStatusDotTitle(`Đồng bộ lúc ${new Date().toLocaleTimeString('vi-VN')}`);
@@ -159,7 +166,7 @@ export default function DisplayScreen() {
       } catch (err) {
         console.warn('Sheet load error:', err);
         if (isMounted) {
-          setAllRows([]);
+          // Keep the last valid data visible when a polling request fails.
           setLoadError(`${config.load_error_message || config.loadErrorMessage}: ${err.message}`);
           setStatusDotColor('#c62828');
           setStatusDotTitle(err.message);
@@ -171,12 +178,18 @@ export default function DisplayScreen() {
       }
     }
 
-    fetchSheet();
     const refreshSec = Math.max(10, Number(config.refresh_sec || config.refresh) || 60);
-    const timer = setInterval(fetchSheet, refreshSec * 1000);
+    async function pollSheet() {
+      await fetchSheet();
+      if (isMounted) {
+        refreshTimer = setTimeout(pollSheet, refreshSec * 1000);
+      }
+    }
+
+    pollSheet();
     return () => {
       isMounted = false;
-      clearInterval(timer);
+      clearTimeout(refreshTimer);
     };
   }, [config]);
 
@@ -263,20 +276,29 @@ export default function DisplayScreen() {
   const { list: displayList, target: dateTarget } = getFilteredRows();
   const totalPages = Math.ceil(displayList.length / pageSize) || 1;
 
+  // If refreshed data has fewer pages, immediately return to a valid page.
+  useEffect(() => {
+    setCurrentPage(previous => previous < totalPages ? previous : 0);
+  }, [totalPages]);
+
   // 5. Auto Paging Timer with transition
   useEffect(() => {
     if (!config || totalPages <= 1) return;
     const intervalSec = Math.max(2, Number(config.interval_sec || config.interval) || 10);
+    let transitionTimer;
 
     const timer = setInterval(() => {
       setAnimClass('slide-out');
-      setTimeout(() => {
+      transitionTimer = setTimeout(() => {
         setCurrentPage(prev => (prev + 1) % totalPages);
         setAnimClass('slide-in');
       }, 350);
     }, intervalSec * 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(transitionTimer);
+    };
   }, [config, totalPages]);
 
   const pagedRows = displayList.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
