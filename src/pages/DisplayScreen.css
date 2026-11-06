@@ -57,6 +57,7 @@
 }
 
 .thaco-display-logo {
+  position: relative;
   height: 100%;
   display: flex;
   align-items: center;
@@ -67,8 +68,23 @@
   font-weight: 800;
   font-size: 3.2vh;
   letter-spacing: 0.05em;
-  clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
   min-width: 19vw;
+  /* bỏ clip-path */
+  margin-right: 3vh; /* chừa chỗ cho mũi tên */
+}
+
+/* Mũi tên tam giác bên phải */
+.thaco-display-logo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 0;
+  height: 0;
+  /* mỗi bên trên/dưới = nửa chiều cao header */
+  border-top: 6.5vh solid transparent;
+  border-bottom: 6.5vh solid transparent;
+  border-left: 3vh solid #00529c;
 }
 
 .thaco-display-logo img {

@@ -10,6 +10,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:3789',
+        //  target: 'https://thacoautohpdvpt.com.vn',
         changeOrigin: true,
         secure: false,
       }
