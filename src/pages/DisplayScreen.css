@@ -87,6 +87,48 @@
   border-left: 3vh solid #00529c;
 }
 
+/* Nút fullscreen: ẩn mặc định, hiện khi di chuột vào góc trên phải */
+.thaco-fs-zone {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 10px;
+  z-index: 100001;
+}
+
+.thaco-fs-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.thaco-fs-zone:hover .thaco-fs-btn {
+  opacity: 0.5;
+}
+
+.thaco-fs-btn:hover,
+.thaco-fs-btn:focus-visible {
+  opacity: 0.9 !important;
+}
+
+.thaco-fs-btn:focus-visible {
+  opacity: 0.9;
+}
+
 .thaco-display-logo img {
   display: block;
   width: 88%;

@@ -1,14 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { api } from '../services/api';
-import './DisplayScreen.css';
+import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import { api } from "../services/api";
+import "./DisplayScreen.css";
 
-const pad = (n) => String(n).padStart(2, '0');
-const formatDate = (d) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-const normalize = (val) => String(val ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().trim();
+const pad = (n) => String(n).padStart(2, "0");
+const formatDate = (d) =>
+  `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+const normalize = (val) =>
+  String(val ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase()
+    .trim();
 
 function parseDate(value) {
-  const text = String(value ?? '').trim();
+  const text = String(value ?? "").trim();
   let match = text.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
   if (match) return new Date(+match[3], +match[2] - 1, +match[1]);
   match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
@@ -16,44 +23,118 @@ function parseDate(value) {
 }
 
 function sameDay(first, second) {
-  return first && second && first.getFullYear() === second.getFullYear() && first.getMonth() === second.getMonth() && first.getDate() === second.getDate();
+  return (
+    first &&
+    second &&
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
 }
 
 function normalizeTime(value) {
-  const text = String(value ?? '').trim();
+  const text = String(value ?? "").trim();
   const match = text.match(/(\d{1,2}):(\d{2})/);
   return match ? `${pad(+match[1])}:${match[2]}` : text;
 }
 
-const isSameData = (first, second) => JSON.stringify(first) === JSON.stringify(second);
+const isSameData = (first, second) =>
+  JSON.stringify(first) === JSON.stringify(second);
 
 function parseCsv(text) {
   const output = [];
-  let row = [], field = '', quoted = false;
+  let row = [],
+    field = "",
+    quoted = false;
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     if (quoted) {
       if (char === '"') {
-        if (text[i + 1] === '"') { field += '"'; i++; } else quoted = false;
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else quoted = false;
       } else field += char;
     } else if (char === '"') quoted = true;
-    else if (char === ',') { row.push(field); field = ''; }
-    else if (char === '\n' || char === '\r') {
-      if (char === '\r' && text[i + 1] === '\n') i++;
-      row.push(field); output.push(row); row = []; field = '';
+    else if (char === ",") {
+      row.push(field);
+      field = "";
+    } else if (char === "\n" || char === "\r") {
+      if (char === "\r" && text[i + 1] === "\n") i++;
+      row.push(field);
+      output.push(row);
+      row = [];
+      field = "";
     } else field += char;
   }
-  if (field !== '' || row.length) { row.push(field); output.push(row); }
+  if (field !== "" || row.length) {
+    row.push(field);
+    output.push(row);
+  }
   return output;
 }
 
 const DEFAULT_ROWS = [
-  { stt: 1, ngay: '', kh: 'Anh Hoàng Nam', bs: '15A-899.23', xe: 'Kia Carnival', gio: '08:30', nd: 'Bảo dưỡng định kỳ 20.000km', tv: 'Nguyễn Văn Minh' },
-  { stt: 2, ngay: '', kh: 'Chị Mai Linh', bs: '15K-123.45', xe: 'Mazda CX-5', gio: '09:00', nd: 'Kiểm tra hệ thống điều hòa', tv: 'Lê Thu Hương' },
-  { stt: 3, ngay: '', kh: 'Anh Tuấn Anh', bs: '15A-678.90', xe: 'Peugeot 3008', gio: '09:30', nd: 'Thay dầu nhớt động cơ', tv: 'Phạm Đức Thành' },
-  { stt: 4, ngay: '', kh: 'Bác Trần Văn Hưng', bs: '15B-345.67', xe: 'Kia Seltos', gio: '10:00', nd: 'Cân bằng động và chỉnh góc lái', tv: 'Nguyễn Văn Minh' },
-  { stt: 5, ngay: '', kh: 'Anh Lê Quang Huy', bs: '15A-456.78', xe: 'Mazda 3', gio: '10:30', nd: 'Bảo dưỡng cấp trung bình', tv: 'Trần Thị Bình' },
-  { stt: 6, ngay: '', kh: 'Chị Đặng Thảo', bs: '15K-999.88', xe: 'Kia K5', gio: '11:00', nd: 'Kiểm tra gầm và phanh', tv: 'Lê Thu Hương' }
+  {
+    stt: 1,
+    ngay: "",
+    kh: "Anh Hoàng Nam",
+    bs: "15A-899.23",
+    xe: "Kia Carnival",
+    gio: "08:30",
+    nd: "Bảo dưỡng định kỳ 20.000km",
+    tv: "Nguyễn Văn Minh",
+  },
+  {
+    stt: 2,
+    ngay: "",
+    kh: "Chị Mai Linh",
+    bs: "15K-123.45",
+    xe: "Mazda CX-5",
+    gio: "09:00",
+    nd: "Kiểm tra hệ thống điều hòa",
+    tv: "Lê Thu Hương",
+  },
+  {
+    stt: 3,
+    ngay: "",
+    kh: "Anh Tuấn Anh",
+    bs: "15A-678.90",
+    xe: "Peugeot 3008",
+    gio: "09:30",
+    nd: "Thay dầu nhớt động cơ",
+    tv: "Phạm Đức Thành",
+  },
+  {
+    stt: 4,
+    ngay: "",
+    kh: "Bác Trần Văn Hưng",
+    bs: "15B-345.67",
+    xe: "Kia Seltos",
+    gio: "10:00",
+    nd: "Cân bằng động và chỉnh góc lái",
+    tv: "Nguyễn Văn Minh",
+  },
+  {
+    stt: 5,
+    ngay: "",
+    kh: "Anh Lê Quang Huy",
+    bs: "15A-456.78",
+    xe: "Mazda 3",
+    gio: "10:30",
+    nd: "Bảo dưỡng cấp trung bình",
+    tv: "Trần Thị Bình",
+  },
+  {
+    stt: 6,
+    ngay: "",
+    kh: "Chị Đặng Thảo",
+    bs: "15K-999.88",
+    xe: "Kia K5",
+    gio: "11:00",
+    nd: "Kiểm tra gầm và phanh",
+    tv: "Lê Thu Hương",
+  },
 ];
 
 export default function DisplayScreen() {
@@ -63,13 +144,43 @@ export default function DisplayScreen() {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(6);
-  const [loadError, setLoadError] = useState('');
-  const [statusDotColor, setStatusDotColor] = useState('#f9a825');
-  const [statusDotTitle, setStatusDotTitle] = useState('Đang khởi tạo');
-  const [animClass, setAnimClass] = useState('slide-in');
+  const [loadError, setLoadError] = useState("");
+  const [statusDotColor, setStatusDotColor] = useState("#f9a825");
+  const [statusDotTitle, setStatusDotTitle] = useState("Đang khởi tạo");
+  const [animClass, setAnimClass] = useState("slide-in");
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const bodyRef = useRef(null);
   const rootRef = useRef(null);
+
+  const toggleFullscreen = () => {
+    const doc = document;
+    const el = document.documentElement;
+    const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+
+    if (!isFs) {
+      const request = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (request) request.call(el);
+    } else {
+      const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+      if (exit) exit.call(doc);
+    }
+  };
+
+  useEffect(() => {
+    const onChange = () => {
+      setIsFullscreen(
+        !!(document.fullscreenElement || document.webkitFullscreenElement),
+      );
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
 
   // 1. Fetch Configuration
   useEffect(() => {
@@ -79,12 +190,12 @@ export default function DisplayScreen() {
         const data = await api.get(`/screens/${slug}`);
         // Keep the same object reference when the server data has not changed.
         // Otherwise every config poll restarts the sheet and paging timers.
-        setConfig(previous => isSameData(previous, data) ? previous : data);
+        setConfig((previous) => (isSameData(previous, data) ? previous : data));
         document.title = `${data.name} | THACO AUTO`;
       } catch (err) {
-        setLoadError('Không tìm thấy cấu hình màn hình: ' + err.message);
-        setStatusDotColor('#c62828');
-        setStatusDotTitle('Lỗi cấu hình');
+        setLoadError("Không tìm thấy cấu hình màn hình: " + err.message);
+        setStatusDotColor("#c62828");
+        setStatusDotTitle("Lỗi cấu hình");
         setIsDataLoading(false);
       }
     }
@@ -100,12 +211,14 @@ export default function DisplayScreen() {
     let isMounted = true;
     let refreshTimer;
     async function fetchSheet() {
-      const sheetUrl = config.sheet_url || config.sheetUrl || '';
+      const sheetUrl = config.sheet_url || config.sheetUrl || "";
       if (!sheetUrl.trim()) {
         if (isMounted) {
-          setAllRows(previous => isSameData(previous, DEFAULT_ROWS) ? previous : DEFAULT_ROWS);
-          setStatusDotColor('#2e7d32');
-          setStatusDotTitle('Hiển thị dữ liệu tiếp nhận dịch vụ');
+          setAllRows((previous) =>
+            isSameData(previous, DEFAULT_ROWS) ? previous : DEFAULT_ROWS,
+          );
+          setStatusDotColor("#2e7d32");
+          setStatusDotTitle("Hiển thị dữ liệu tiếp nhận dịch vụ");
           setIsDataLoading(false);
         }
         return;
@@ -115,60 +228,71 @@ export default function DisplayScreen() {
         let url = sheetUrl.trim();
         const match = url.match(/\/spreadsheets\/d\/(?:e\/)?([^/?#]+)/);
         if (match && !/\/pub\?|output=csv/.test(url)) {
-          url = `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(config.sheet_name || config.sheetName || '')}`;
+          url = `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(config.sheet_name || config.sheetName || "")}`;
         }
 
-        const res = await fetch(url, { cache: 'no-store' });
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
-        const table = parseCsv(text).filter(r => r.some(c => c.trim()));
-        if (!table.length) throw new Error('Sheet rỗng');
+        const table = parseCsv(text).filter((r) => r.some((c) => c.trim()));
+        if (!table.length) throw new Error("Sheet rỗng");
 
         const headings = table[0].map(normalize);
         const findIndex = (keys, fallback) => {
-          const idx = headings.findIndex(h => keys.some(k => h.includes(k)));
+          const idx = headings.findIndex((h) =>
+            keys.some((k) => h.includes(k)),
+          );
           return idx >= 0 ? idx : fallback;
         };
 
         const idxs = {
-          ngay: findIndex(['ngay'], 0),
-          stt: findIndex(['stt'], 1),
-          kh: findIndex(['khach'], 2),
-          bs: findIndex(['bien'], 3),
-          xe: findIndex(['mau'], 4),
-          gio: findIndex(['thoi gian', 'gio'], 5),
-          nd: findIndex(['noi dung', 'cong viec'], 6),
-          tv: findIndex(['tu van', 'dich vu'], 7)
+          ngay: findIndex(["ngay"], 0),
+          stt: findIndex(["stt"], 1),
+          kh: findIndex(["khach"], 2),
+          bs: findIndex(["bien"], 3),
+          xe: findIndex(["mau"], 4),
+          gio: findIndex(["thoi gian", "gio"], 5),
+          nd: findIndex(["noi dung", "cong viec"], 6),
+          tv: findIndex(["tu van", "dich vu"], 7),
         };
 
-        const parsed = table.slice(1).map(row => {
-          const get = k => (row[idxs[k]] || '').trim();
-          return {
-            ngay: get('ngay'),
-            stt: get('stt'),
-            kh: get('kh'),
-            bs: get('bs'),
-            xe: get('xe'),
-            gio: normalizeTime(get('gio')),
-            nd: get('nd'),
-            tv: get('tv')
-          };
-        }).filter(r => r.kh || r.bs);
+        const parsed = table
+          .slice(1)
+          .map((row) => {
+            const get = (k) => (row[idxs[k]] || "").trim();
+            return {
+              ngay: get("ngay"),
+              stt: get("stt"),
+              kh: get("kh"),
+              bs: get("bs"),
+              xe: get("xe"),
+              gio: normalizeTime(get("gio")),
+              nd: get("nd"),
+              tv: get("tv"),
+            };
+          })
+          .filter((r) => r.kh || r.bs);
 
         if (isMounted) {
           // Only update state when the sheet content actually changed so the
           // independent paging cycle can continue uninterrupted.
-          setAllRows(previous => isSameData(previous, parsed) ? previous : parsed);
-          setLoadError('');
-          setStatusDotColor('#2e7d32');
-          setStatusDotTitle(`Đồng bộ lúc ${new Date().toLocaleTimeString('vi-VN')}`);
+          setAllRows((previous) =>
+            isSameData(previous, parsed) ? previous : parsed,
+          );
+          setLoadError("");
+          setStatusDotColor("#2e7d32");
+          setStatusDotTitle(
+            `Đồng bộ lúc ${new Date().toLocaleTimeString("vi-VN")}`,
+          );
         }
       } catch (err) {
-        console.warn('Sheet load error:', err);
+        console.warn("Sheet load error:", err);
         if (isMounted) {
           // Keep the last valid data visible when a polling request fails.
-          setLoadError(`${config.load_error_message || config.loadErrorMessage}: ${err.message}`);
-          setStatusDotColor('#c62828');
+          setLoadError(
+            `${config.load_error_message || config.loadErrorMessage}: ${err.message}`,
+          );
+          setStatusDotColor("#c62828");
           setStatusDotTitle(err.message);
         }
       } finally {
@@ -178,7 +302,10 @@ export default function DisplayScreen() {
       }
     }
 
-    const refreshSec = Math.max(10, Number(config.refresh_sec || config.refresh) || 60);
+    const refreshSec = Math.max(
+      10,
+      Number(config.refresh_sec || config.refresh) || 60,
+    );
     async function pollSheet() {
       await fetchSheet();
       if (isMounted) {
@@ -208,16 +335,30 @@ export default function DisplayScreen() {
       else if (width < 1200) scale = 0.82;
       else if (width < 1440) scale = 0.92;
 
-      const calculatedSize = config.mode === 'fixed'
-        ? Math.max(1, Number(config.page_size || config.pageSize) || 6)
-        : Math.max(1, Math.floor(bodyHeight / Math.max(55, Number(config.min_row_h || config.minRowH) || 70)));
+      const calculatedSize =
+        config.mode === "fixed"
+          ? Math.max(1, Number(config.page_size || config.pageSize) || 6)
+          : Math.max(
+              1,
+              Math.floor(
+                bodyHeight /
+                  Math.max(
+                    55,
+                    Number(config.min_row_h || config.minRowH) || 70,
+                  ),
+              ),
+            );
 
-      const rowHeight = width < 580 ? 52 : (bodyHeight / calculatedSize);
-      const headingFontSize = width < 580 ? 12 : Math.min(bodyHeight * 0.045, width * 0.016);
+      const rowHeight = width < 580 ? 52 : bodyHeight / calculatedSize;
+      const headingFontSize =
+        width < 580 ? 12 : Math.min(bodyHeight * 0.045, width * 0.016);
 
-      const baseTitle = Number(config.title_font_size || config.titleFontSize) || 48;
-      const baseDate = Number(config.date_font_size || config.dateFontSize) || 31;
-      const baseData = Number(config.data_font_size || config.dataFontSize) || 24;
+      const baseTitle =
+        Number(config.title_font_size || config.titleFontSize) || 48;
+      const baseDate =
+        Number(config.date_font_size || config.dateFontSize) || 31;
+      const baseData =
+        Number(config.data_font_size || config.dataFontSize) || 24;
 
       // Browser zoom reduces the CSS viewport height. On short viewports (for
       // example old Opera at 150%), fit both title lines inside the 13vh header
@@ -226,9 +367,10 @@ export default function DisplayScreen() {
       const requestedDate = Math.max(13, Math.round(baseDate * scale));
       const headerHeight = Math.max(70, viewportHeight * 0.13);
       const headerTextHeight = requestedTitle * 1.05 + requestedDate * 1.1 + 2;
-      const headerHeightScale = width > 1200
-        ? Math.min(1, Math.max(0.65, (headerHeight - 8) / headerTextHeight))
-        : 1;
+      const headerHeightScale =
+        width > 1200
+          ? Math.min(1, Math.max(0.65, (headerHeight - 8) / headerTextHeight))
+          : 1;
 
       // Font chữ nội dung được giới hạn tự động theo chiều cao của hàng để không bao giờ bị đè chữ
       const maxDataFont = Math.max(12, Math.floor(rowHeight * 0.28));
@@ -236,23 +378,41 @@ export default function DisplayScreen() {
       const finalDataFont = Math.max(12, Math.min(scaledData, maxDataFont));
 
       const style = rootRef.current.style;
-      style.setProperty('--row-height', `${rowHeight}px`);
-      style.setProperty('--heading-font-size', `${Math.max(11, Math.round(headingFontSize * scale))}px`);
-      style.setProperty('--head-color', config.color_head || config.colorHead || '#4472c4');
-      style.setProperty('--row-color-1', config.color1 || '#cfd5ea');
-      style.setProperty('--row-color-2', config.color2 || '#e9ebf5');
-      style.setProperty('--text-color', config.color_text || config.colorText || '#00529c');
-      style.setProperty('--title-color', config.color_title || config.colorTitle || '#ff0000');
-      style.setProperty('--title-font-size', `${Math.max(18, Math.floor(requestedTitle * headerHeightScale))}px`);
-      style.setProperty('--date-font-size', `${Math.max(13, Math.floor(requestedDate * headerHeightScale))}px`);
-      style.setProperty('--data-font-size', `${finalDataFont}px`);
+      style.setProperty("--row-height", `${rowHeight}px`);
+      style.setProperty(
+        "--heading-font-size",
+        `${Math.max(11, Math.round(headingFontSize * scale))}px`,
+      );
+      style.setProperty(
+        "--head-color",
+        config.color_head || config.colorHead || "#4472c4",
+      );
+      style.setProperty("--row-color-1", config.color1 || "#cfd5ea");
+      style.setProperty("--row-color-2", config.color2 || "#e9ebf5");
+      style.setProperty(
+        "--text-color",
+        config.color_text || config.colorText || "#00529c",
+      );
+      style.setProperty(
+        "--title-color",
+        config.color_title || config.colorTitle || "#ff0000",
+      );
+      style.setProperty(
+        "--title-font-size",
+        `${Math.max(18, Math.floor(requestedTitle * headerHeightScale))}px`,
+      );
+      style.setProperty(
+        "--date-font-size",
+        `${Math.max(13, Math.floor(requestedDate * headerHeightScale))}px`,
+      );
+      style.setProperty("--data-font-size", `${finalDataFont}px`);
 
       setPageSize(calculatedSize);
     }
 
     recalc();
-    window.addEventListener('resize', recalc);
-    return () => window.removeEventListener('resize', recalc);
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
   }, [config]);
 
   // 4. Filtering and Sorting Rows
@@ -260,22 +420,23 @@ export default function DisplayScreen() {
     if (!config) return { list: [], target: new Date() };
     let list = allRows.slice();
     let target = null;
-    const dateMode = config.date_mode || config.dateMode || 'today';
-    const fixedDate = config.fixed_date || config.date || '';
+    const dateMode = config.date_mode || config.dateMode || "today";
+    const fixedDate = config.fixed_date || config.date || "";
 
-    if (dateMode === 'today') target = new Date();
-    else if (dateMode === 'date') target = parseDate(fixedDate);
+    if (dateMode === "today") target = new Date();
+    else if (dateMode === "date") target = parseDate(fixedDate);
 
     if (target) {
-      list = list.filter(row => {
+      list = list.filter((row) => {
         const date = parseDate(row.ngay);
         return !date || sameDay(date, target);
       });
     }
 
-    const sortTime = config.sort_time !== undefined ? config.sort_time : config.sortTime;
+    const sortTime =
+      config.sort_time !== undefined ? config.sort_time : config.sortTime;
     if (sortTime) {
-      list.sort((a, b) => (a.gio || '99').localeCompare(b.gio || '99'));
+      list.sort((a, b) => (a.gio || "99").localeCompare(b.gio || "99"));
     }
 
     list.forEach((row, idx) => {
@@ -290,20 +451,23 @@ export default function DisplayScreen() {
 
   // If refreshed data has fewer pages, immediately return to a valid page.
   useEffect(() => {
-    setCurrentPage(previous => previous < totalPages ? previous : 0);
+    setCurrentPage((previous) => (previous < totalPages ? previous : 0));
   }, [totalPages]);
 
   // 5. Auto Paging Timer with transition
   useEffect(() => {
     if (!config || totalPages <= 1) return;
-    const intervalSec = Math.max(2, Number(config.interval_sec || config.interval) || 10);
+    const intervalSec = Math.max(
+      2,
+      Number(config.interval_sec || config.interval) || 10,
+    );
     let transitionTimer;
 
     const timer = setInterval(() => {
-      setAnimClass('slide-out');
+      setAnimClass("slide-out");
       transitionTimer = setTimeout(() => {
-        setCurrentPage(prev => (prev + 1) % totalPages);
-        setAnimClass('slide-in');
+        setCurrentPage((prev) => (prev + 1) % totalPages);
+        setAnimClass("slide-in");
       }, 350);
     }, intervalSec * 1000);
 
@@ -313,9 +477,13 @@ export default function DisplayScreen() {
     };
   }, [config, totalPages]);
 
-  const pagedRows = displayList.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
-  const logoUrl = (config?.logo || '').trim() || '/image/LOGO-THACO-AUTO-white.png';
-  const dateLabel = config?.date_label || config?.dateLabel || 'NGÀY:';
+  const pagedRows = displayList.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+  const logoUrl =
+    (config?.logo || "").trim() || "/image/LOGO-THACO-AUTO-white.png";
+  const dateLabel = config?.date_label || config?.dateLabel || "NGÀY:";
 
   return (
     <div className="thaco-display-root" ref={rootRef}>
@@ -332,7 +500,7 @@ export default function DisplayScreen() {
           />
           <div className="thaco-display-titles" id="titles">
             <h1 className="thaco-display-title" id="title">
-              {config?.title || 'KHÁCH HÀNG ĐẶT LỊCH HẸN'}
+              {config?.title || "KHÁCH HÀNG ĐẶT LỊCH HẸN"}
             </h1>
             <div className="thaco-display-date" id="dateTitle">
               {dateLabel} {formatDate(dateTarget)}
@@ -346,7 +514,11 @@ export default function DisplayScreen() {
         </div> */}
 
         {/* Section Grid matching original #grid exactly */}
-        <section className="thaco-display-grid" id="grid" aria-label="Lịch hẹn dịch vụ">
+        <section
+          className="thaco-display-grid"
+          id="grid"
+          aria-label="Lịch hẹn dịch vụ"
+        >
           {/* Heading Row */}
           <div className="thaco-display-row thaco-display-heading heading-row">
             <div>STT</div>
@@ -376,16 +548,32 @@ export default function DisplayScreen() {
 
             {isDataLoading ? (
               <div className="thaco-display-message" id="message">
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.85rem' }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "0.85rem",
+                  }}
+                >
                   <div className="thaco-spinner" />
-                  <span style={{ fontSize: '1.25rem', color: 'var(--text-color, #00529c)', fontWeight: 700 }}>
+                  <span
+                    style={{
+                      fontSize: "1.25rem",
+                      color: "var(--text-color, #00529c)",
+                      fontWeight: 700,
+                    }}
+                  >
                     Đang tải dữ liệu lịch hẹn...
                   </span>
                 </div>
               </div>
             ) : displayList.length === 0 ? (
               <div className="thaco-display-message" id="message">
-                {loadError || config?.empty_message || config?.emptyMessage || 'Hôm nay chưa có lịch hẹn'}
+                {loadError ||
+                  config?.empty_message ||
+                  config?.emptyMessage ||
+                  "Hôm nay chưa có lịch hẹn"}
               </div>
             ) : null}
           </div>
@@ -406,6 +594,45 @@ export default function DisplayScreen() {
           Trang {currentPage + 1}/{totalPages}
         </div>
       )}
+
+      {/* Vùng hover góc trên bên phải + nút fullscreen */}
+      <div className="thaco-fs-zone">
+        <button
+          type="button"
+          className="thaco-fs-btn"
+          onClick={toggleFullscreen}
+          title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+          aria-label={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+        >
+          {isFullscreen ? (
+            <svg
+              viewBox="0 0 24 24"
+              width="28"
+              height="28"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              width="28"
+              height="28"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+            </svg>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
