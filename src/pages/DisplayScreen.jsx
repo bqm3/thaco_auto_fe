@@ -493,11 +493,6 @@ export default function DisplayScreen() {
           <div className="thaco-display-logo" id="logo">
             <img src={logoUrl} alt="THACO AUTO" />
           </div>
-          <img
-            src="/image/LOGO-THACO-AUTO.png"
-            alt="THACO AUTO"
-            className="thaco-responsive-logo"
-          />
           <div className="thaco-display-titles" id="titles">
             <h1 className="thaco-display-title" id="title">
               {config?.title || "KHÁCH HÀNG ĐẶT LỊCH HẸN"}

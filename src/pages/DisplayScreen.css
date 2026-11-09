@@ -25,6 +25,7 @@
   --title-font-size: 48px;
   --date-font-size: 31px;
   --heading-font-size: 20px;
+  --display-columns: minmax(0, 4.5fr) minmax(0, 15fr) minmax(0, 11fr) minmax(0, 11fr) minmax(0, 8.5fr) minmax(0, 27fr) minmax(0, 24fr);
 
   position: fixed;
   inset: 0;
@@ -46,45 +47,43 @@
 
 /* Header */
 .thaco-display-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--display-columns);
   align-items: center;
-  gap: 2vw;
   height: 13vh;
   min-height: 70px;
-  padding-right: 2vw;
   background: linear-gradient(90deg, #fff 0, #fff6c9 12%, #fffbe0 100%);
   flex: none;
+  overflow: hidden;
 }
 
 .thaco-display-logo {
   position: relative;
+  grid-column: 1 / 4;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 2.2vw;
+  padding: 0 3.5vw 0 2vw;
   background: #00529c;
   color: #fff;
   font-weight: 800;
   font-size: 3.2vh;
   letter-spacing: 0.05em;
-  min-width: 19vw;
-  /* bỏ clip-path */
-  margin-right: 3vh; /* chừa chỗ cho mũi tên */
+  min-width: 0;
+  overflow: visible;
 }
 
-/* Mũi tên tam giác bên phải */
 .thaco-display-logo::after {
   content: "";
   position: absolute;
   top: 0;
   left: 100%;
-  width: 0;
-  height: 0;
-  /* mỗi bên trên/dưới = nửa chiều cao header */
-  border-top: 6.5vh solid transparent;
-  border-bottom: 6.5vh solid transparent;
-  border-left: 3vh solid #00529c;
+  width: 3vh;
+  height: 100%;
+  background: #00529c;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  pointer-events: none;
 }
 
 /* Nút fullscreen: ẩn mặc định, hiện khi di chuột vào góc trên phải */
@@ -131,19 +130,16 @@
 
 .thaco-display-logo img {
   display: block;
-  width: 88%;
-  max-height: 72%;
+  width: 78%;
+  max-height: 62%;
   object-fit: contain;
 }
 
-.thaco-responsive-logo {
-  display: none;
-}
-
 .thaco-display-titles {
-  flex: 1;
+  grid-column: 4 / 8;
   min-width: 0;
   text-align: center;
+  padding: 0 2vw;
 }
 
 .thaco-display-title {
@@ -174,7 +170,7 @@
 .thaco-display-row {
   display: grid;
   /* Tối ưu tỉ lệ 7 cột: tăng cột Nội Dung lên 27fr và Tư Vấn lên 24fr để chứa trọn vẹn văn bản */
-  grid-template-columns: minmax(0, 4.5fr) minmax(0, 15fr) minmax(0, 11fr) minmax(0, 11fr) minmax(0, 8.5fr) minmax(0, 27fr) minmax(0, 24fr);
+  grid-template-columns: var(--display-columns);
   border-bottom: 1px solid #fff;
   overflow: hidden;
   /* Bắt buộc để không bao giờ tràn đè lên dòng khác */
@@ -335,33 +331,6 @@
 
 /* 1. Màn hình Laptop, Tablet xoay ngang (Từ 1200px trở xuống) */
 @media (max-width: 1200px) {
-
-  /* Header chuyển thành dạng cột gọn gàng, cân đối */
-  .thaco-display-head {
-    height: auto;
-    min-height: unset;
-    padding: 0.65rem 1rem;
-    flex-direction: column;
-    text-align: center;
-    gap: 0.25rem;
-  }
-
-  /* Ẩn hoàn toàn container .thaco-display-logo khi responsive theo yêu cầu */
-  .thaco-display-logo {
-    display: none !important;
-  }
-
-  /* Hiển thị trực tiếp ảnh LOGO-THACO-AUTO.png to rõ ràng trên nền header */
-  .thaco-responsive-logo {
-    display: block;
-    height: auto;
-    max-height: 56px;
-    width: auto;
-    max-width: min(280px, 85vw);
-    object-fit: contain;
-    margin: 2px auto 4px auto;
-  }
-
   .thaco-display-title {
     font-size: clamp(20px, 3.2vw, 32px) !important;
     line-height: 1.2;
@@ -491,5 +460,30 @@
     text-align: center;
     padding: 5px 10px;
     border-bottom: 1px solid #bae6fd;
+  }
+}
+
+/* Keep the arrow's vertical tail on the exact same grid boundary as the table. */
+@media (max-width: 1200px) {
+  .thaco-display-head {
+    grid-template-columns: minmax(36px, 4fr) minmax(95px, 15fr) minmax(80px, 11fr) minmax(80px, 11fr) minmax(58px, 8.5fr) minmax(130px, 28fr) minmax(120px, 24fr);
+    height: 13vh;
+    min-height: 70px;
+    padding: 0;
+    gap: 0;
+    text-align: initial;
+  }
+}
+
+@media (max-width: 768px) {
+  .thaco-display-head {
+    grid-template-columns: minmax(30px, 3.5fr) minmax(85px, 15fr) minmax(70px, 11fr) minmax(70px, 11fr) minmax(52px, 8fr) minmax(110px, 24fr) minmax(105px, 27.5fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .thaco-display-head {
+    grid-template-columns: 36px 120px 90px 90px 65px 145px 144px;
+    min-width: 660px;
   }
 }
